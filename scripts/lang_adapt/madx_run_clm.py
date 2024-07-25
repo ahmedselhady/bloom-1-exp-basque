@@ -654,7 +654,6 @@ def load_tokenizer(model_args):
     return tokenizer
 
 
-
 def load_data(data_args, model_args):
     # Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
     # or just provide the name of one of the public datasets available on the hub at https://huggingface.co/datasets/
@@ -666,10 +665,17 @@ def load_data(data_args, model_args):
     # In distributed training, the load_dataset function guarantee that only one local process can concurrently
     # download the dataset.
     if data_args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        raw_datasets = load_dataset(
-            data_args.dataset_name, data_args.dataset_config_name, cache_dir=model_args.cache_dir
-        )
+        
+        if data_args.dataset_config_name is not None:
+            # Downloading and loading a dataset from the hub.
+            raw_datasets = load_dataset(
+                data_args.dataset_name, data_args.dataset_config_name, cache_dir=model_args.cache_dir
+            )
+        else:
+            # Downloading and loading a dataset from the hub.
+            raw_datasets = load_dataset(
+                data_args.dataset_name, cache_dir=model_args.cache_dir
+            )
     else:
         data_files = {}
         dataset_args = {}
@@ -693,7 +699,7 @@ def load_data(data_args, model_args):
         elif data_args.max_eval_samples is not None :                
             raw_datasets = raw_datasets['train'].train_test_split(test_size = data_args.max_eval_samples)
         else:
-            raw_datasets = raw_datasets['train'].train_test_split(test_size = data.args.validation_split_percentage/100.0)
+            raw_datasets = raw_datasets['train'].train_test_split(test_size = data_args.validation_split_percentage/100.0)
         raw_datasets['validation'] = raw_datasets['test']
     # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
     # https://huggingface.co/docs/datasets/loading_datasets.html.
@@ -1310,7 +1316,7 @@ def main():
 
     tokenizer = load_tokenizer(model_args)
     model = load_model(model_args, tokenizer)
-    modify_model(adapter_args, data_args, model_args, tokenizer, model)
+    #modify_model(adapter_args, data_args, model_args, tokenizer, model)
     
     # Preprocessing the datasets.
     lm_datasets = get_lm_dataset(training_args, data_args, model_args, tokenizer)
@@ -1370,7 +1376,7 @@ def main():
             checkpoint = training_args.resume_from_checkpoint
         elif last_checkpoint is not None:
             checkpoint = last_checkpoint
-        trainer.add_callback(EarlyStoppingCallback(3))
+        trainer.add_callback(EarlyStoppingCallback(5))
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         trainer.save_model()  # Saves the tokenizer too for easy upload # normally this part only saves the adapters? (TODO: check)
 

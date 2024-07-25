@@ -41,18 +41,19 @@ lang = args.lang
 
 if  args.sample_size:
     raw_datasets = load_dataset(
-        "oscar", 
+        "HiTZ/euscrawl", 
         f"unshuffled_deduplicated_{lang}", 
         cache_dir=args.hf_cache_dir
     )["train"].shuffle(seed=args.seed).select(range(args.sample_size))
    
 else: 
     raw_datasets = load_dataset(
-        "oscar", 
+        "HiTZ/euscrawl", 
         f"unshuffled_deduplicated_{lang}", 
         cache_dir=args.hf_cache_dir
     )["train"]
- 
+
+'''
 print(f"✅ Loaded raw_datasets OSCAR language {lang}")
 
 def batch_iterator():
@@ -86,3 +87,4 @@ elif args.tok_strategy in ('replace', 'overlap-replace', 'overlap-replace-breakd
     print("✅ Trained tokenizer with len ", len(new_tokenizer))
     new_tokenizer.save_pretrained(f"{args.tokenizer_dir}")
     print(f"Saved tokenizer to {args.tokenizer_dir}")
+'''
